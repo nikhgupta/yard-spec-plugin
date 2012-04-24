@@ -1,0 +1,8 @@
+<% if object[:routing_specs] %>
+<div class="tags">
+  <h3>Routing explanations:</h3>
+  <ul class="specs">
+	  <%= render_contexts object[:routing_specs] %>
+  </ul>
+</div>
+<% end %>

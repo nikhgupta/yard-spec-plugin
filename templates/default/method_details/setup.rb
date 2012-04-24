@@ -1,6 +1,7 @@
 def init
  super
  sections.last.place(:specs).before(:source)
+ sections.last.place(:routing_specs).before(:specs)
 end
 
 def render_specs specs

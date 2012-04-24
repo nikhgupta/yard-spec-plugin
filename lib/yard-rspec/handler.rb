@@ -14,6 +14,10 @@ class RSpecDescribeHandler < YARD::Handlers::Ruby::Base
       describes = '#'+controller_test[2]
       context = ["When called with the http #{controller_test[1]} verb"]
     end
+    if (routing_test = describes.match(/^routing.*/))
+      describes = ''
+      context = ["routing_test"]
+    end
 
     unless owner.is_a?(Hash)
       pwner = Hash[describes: describes, context: context]
@@ -49,8 +53,15 @@ class RSpecItHandler < YARD::Handlers::Ruby::Base
   def process
     return unless owner.is_a?(Hash)
     return unless owner[:describes]
+    
+    node_name = owner[:describes]
+    
+    if !owner[:describes][/#\w+/]
+      node_name = owner[:describes] + statement.parameters.first.jump(:string_content).source[/#\w+/].to_s
+    end
+    ensure_loaded!(P(node_name))
 
-    node = YARD::Registry.resolve(nil, owner[:describes], true)
+    node = YARD::Registry.resolve(nil, node_name, true)
     spec = if statement.parameters
              statement.parameters.first.jump(:string_content).source
            else
@@ -64,6 +75,8 @@ class RSpecItHandler < YARD::Handlers::Ruby::Base
       # owner[:describes]
       return
     end
+
+    return process_routing_spec(node) if owner[:context].include?("routing_test")
 
     if last = statement.last.last
       source = last.source.strip
@@ -81,6 +94,35 @@ class RSpecItHandler < YARD::Handlers::Ruby::Base
             file: statement.file,
             line: statement.line,
             source: source ]
+  end
+  
+  def process_routing_spec(parent)
+    if last = statement.last.last
+      source = last.source.strip
+    else
+      source = ""
+    end
+
+    routing_specs = (parent[:routing_specs] ||= {})
+    (owner[:context] - ["routing_test"]).each do |c|
+      routing_specs = (routing_specs[c] ||= {})
+    end
+
+    description = if statement.parameters && !(statement.parameters.first.jump(:string_content).source[/^routes to #\w+/])
+      statement.parameters.first.jump(:string_content).source + ": "
+    else
+      ""
+    end
+
+    source.split("\n").each do |line|
+      if line[/(get|post|put|delete).*\.should(_not)? route_to/]
+        (routing_specs["specs"] ||= []) << \
+          Hash[ name: description + line,
+                file: statement.file,
+                line: statement.line,
+                source: source ]
+      end
+    end
   end
 end
 
