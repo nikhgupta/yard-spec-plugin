@@ -9,12 +9,19 @@ class RSpecDescribeHandler < YARD::Handlers::Ruby::Base
       describes = describes[0, describes.length - arguments.length]
     end
 
+    context = []
+    if (controller_test = describes.match(/(GET|PUT|POST|DELETE) '?(\w+)'?/))
+      describes = '#'+controller_test[2]
+      context = ["When called with the http #{controller_test[1]} verb"]
+    end
+
     unless owner.is_a?(Hash)
-      pwner = Hash[describes: describes, context: []]
+      pwner = Hash[describes: describes, context: context]
       parse_block(statement.last.last, owner: pwner)
     else
       describes = owner[:describes] + describes
       pwner = owner.merge(describes: describes)
+      pwner[:context] = pwner[:context] + context
       parse_block(statement.last.last, owner: pwner)
     end
   rescue YARD::Handlers::NamespaceMissingError
