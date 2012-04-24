@@ -1,30 +1,34 @@
-= Embedding RSpec Specifications in YARD Documentation
+YARD-RSpec: A YARD extension for RSpec
+=======================================
 
-This plugin demonstrates how RSpec tests can be embedded within standard documentation
-using only a small amount of plugin code. The example generates documentation
-for the following {String#pig_latin} method and RSpec tests:
+YARD-Rspec is a YARD plugin that processes specs files and includes them in the documentation.
 
-  # Run `yardoc -e ../lib/yard-rspec example_code.rb`
+This release takes the work started by [@lsegal](https://github.com/lsegal/yard-spec-plugin) and [@kputnam](https://github.com/kputnam/yard-spec-plugin)
+and expands it with the support for:
 
-  class String
-    # Pig latin of a String
-    def pig_latin
-      self[1..-1] + self[0] + "ay"
-    end
-  end
+- Specs about a whole class
+- [rspec-rails](https://github.com/rspec/rspec-rails) **controller specs** style 
+- [rspec-rails](https://github.com/rspec/rspec-rails) **routing specs** style
 
-  # 
-  # Specs
-  # 
-  describe String, '#pig_latin' do
-    it "should be a pig!" do
-      "hello".pig_latin.should == "ellohay"
-     end
+Installation
+------------
 
-    it "should fail to be a pig!" do
-      "hello".pig_latin.should == "hello"
-    end
-  end
+To install this release add this line to your application's Gemfile:
 
-View the "Specifications" section within the {String#pig_latin} method to see
-these tests.
+  gem 'yard-spec-plugin', :git => 'https://github.com/ogeidix/yard-spec-plugin.git', :tag => 'v0.2'
+
+Execute:
+
+  $ bundle
+
+Then edit the file _.yardopts_ with
+
+  "{lib,app}/**/*.rb" "spec/{models,controllers,routing,mailers,lib,observers}/**/*.rb"  --plugin rspec
+
+
+Usage
+-----
+
+Now you can execure yard doc with
+
+    bundle exec yard doc
