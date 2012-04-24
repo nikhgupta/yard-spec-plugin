@@ -1,0 +1,12 @@
+<ul>
+	<%= render_specs contexts["specs"] if contexts["specs"]  %>
+
+	<% contexts.each do |context_name, context| %>
+		<% if context_name != "specs" %>
+		  <li>
+			  <b><%= context_name %></b>
+			  <%= render_contexts context %>
+		  </li>
+		<% end %>
+	<% end %>
+</ul>

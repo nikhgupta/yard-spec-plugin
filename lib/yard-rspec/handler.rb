@@ -10,7 +10,7 @@ class RSpecDescribeHandler < YARD::Handlers::Ruby::Base
     end
 
     unless owner.is_a?(Hash)
-      pwner = Hash[describes: describes, context: ""]
+      pwner = Hash[describes: describes, context: []]
       parse_block(statement.last.last, owner: pwner)
     else
       describes = owner[:describes] + describes
@@ -27,7 +27,7 @@ class RSpecContextHandler < YARD::Handlers::Ruby::Base
   def process
     if owner.is_a?(Hash)
       context = statement.parameters.first.jump(:string_content).source
-      context = owner[:context] + context + " "
+      context = owner[:context].dup << context
 
       parse_block(statement.last.last, owner: owner.merge(context: context))
     end
@@ -64,8 +64,13 @@ class RSpecItHandler < YARD::Handlers::Ruby::Base
       source = ""
     end
 
-    (node[:specifications] ||= []) << \
-      Hash[ name: owner[:context] + spec,
+    specifications = (node[:specifications] ||= {})
+    owner[:context].each do |c|
+      specifications = (specifications[c] ||= {})
+    end
+
+    (specifications["specs"] ||= []) << \
+      Hash[ name: spec,
             file: statement.file,
             line: statement.line,
             source: source ]
@@ -100,8 +105,13 @@ class RSpecItsHandler < YARD::Handlers::Ruby::Base
       source = ""
     end
 
-    (node[:specifications] ||= []) << \
-      Hash[ name: owner[:context] + spec,
+    specifications = (node[:specifications] ||= {})
+    owner[:context].each do |c|
+      specifications = (specifications[c] ||= {})
+    end
+
+    (specifications["specs"] ||= []) << \
+      Hash[ name: spec,
             file: statement.file,
             line: statement.line,
             source: source ]
