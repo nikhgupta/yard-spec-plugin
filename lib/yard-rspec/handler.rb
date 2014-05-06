@@ -1,6 +1,6 @@
 class RSpecDescribeHandler < YARD::Handlers::Ruby::Base
   handles method_call(:describe)
-  
+
   def process
     describes = statement.parameters.first.jump(:string_content).source
 
@@ -49,21 +49,49 @@ end
 class RSpecItHandler < YARD::Handlers::Ruby::Base
   handles method_call(:it)
   handles method_call(:specify)
-  
+
   def process
     return unless owner.is_a?(Hash)
     return unless owner[:describes]
-    
+
     node_name = owner[:describes]
-    
-    if !owner[:describes][/#\w+/]
+
+    if !owner[:describes][/#\w+/] && statement.parameters.first
       node_name = owner[:describes] + statement.parameters.first.jump(:string_content).source[/#\w+/].to_s
     end
     ensure_loaded!(P(node_name))
 
     node = YARD::Registry.resolve(nil, node_name, true)
-    spec = if statement.parameters
+    # require "pry"
+    # binding.pry
+    # exit if ENV['EXIT']
+    spec = if statement.parameters.any?
              statement.parameters.first.jump(:string_content).source
+           elsif statement.block && statement.docstring
+             statement.docstring
+           elsif statement.block
+             matcher   = statement.block.jump(:command)
+             relation  = matcher.parameters.first
+             reference = relation.parameters.first.jump(:ident).source
+             options   = if relation.parameters[-2] && relation.parameters[-2].first.type == :assoc
+                           begin
+                             temp = relation.parameters[-2].collect do |a|
+                               a.map{|b| b.source.tr(":","")}.join(" ")
+                             end
+                             if temp.length > 1
+                               temp[0, temp.length - 1].join(" ") + " and " + temp.pop
+                             else
+                               temp.first
+                             end
+                           rescue
+                             nil
+                           end
+                         end
+             matcher   = matcher.method_name.source.humanize.downcase
+             relation  = relation.method_name.source.humanize.downcase
+             resolved  = YARD::Registry.resolve(nil, reference.classify)
+             reference = resolved ? "<a href='/docs/#{resolved.path}'>#{resolved.name}</a>" : reference.humanize.downcase
+             "#{matcher} #{relation} #{reference} #{options}".strip
            else
              "untitled spec"
            end
@@ -95,7 +123,7 @@ class RSpecItHandler < YARD::Handlers::Ruby::Base
             line: statement.line,
             source: source ]
   end
-  
+
   def process_routing_spec(parent)
     if last = statement.last.last
       source = last.source.strip
@@ -109,10 +137,10 @@ class RSpecItHandler < YARD::Handlers::Ruby::Base
     end
 
     description = if statement.parameters && !(statement.parameters.first.jump(:string_content).source[/^routes to #\w+/])
-      statement.parameters.first.jump(:string_content).source + ": "
-    else
-      ""
-    end
+                    statement.parameters.first.jump(:string_content).source + ": "
+                  else
+                    ""
+                  end
 
     source.split("\n").each do |line|
       if line[/(get|post|put|delete).*\.should(_not)? route_to/]
@@ -128,7 +156,7 @@ end
 
 class RSpecItsHandler < YARD::Handlers::Ruby::Base
   handles method_call(:its)
-  
+
   def process
     return unless owner.is_a?(Hash)
     return unless owner[:describes]

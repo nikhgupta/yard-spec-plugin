@@ -7,7 +7,7 @@ Gem::Specification.new do |s|
   s.authors       = ["Loren Segal", "@pqmodn", "@ogeidix"]
   s.homepage      = "http://yardoc.org"
   s.platform      = Gem::Platform::RUBY
-  s.files         = Dir.glob("{example,lib,templates}/**/*") + ['LICENSE', 'README.rdoc', 'Rakefile']
+  s.files         = Dir.glob("{example,lib,templates}/**/*") + ['LICENSE', 'README.md', 'Rakefile']
   s.require_paths = ['lib']
   s.has_rdoc      = 'yard'
   s.rubyforge_project = 'yard-rspec'
