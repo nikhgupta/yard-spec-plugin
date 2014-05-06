@@ -1,21 +1,22 @@
 YARD-RSpec: A YARD extension for RSpec
 =======================================
 
+**Updated: May 07, 2014**
+
 YARD-Rspec is a YARD plugin that processes specs files and includes them in the documentation.
 
-This release takes the work started by [@lsegal](https://github.com/lsegal/yard-spec-plugin) and [@kputnam](https://github.com/kputnam/yard-spec-plugin)
-and expands it with the support for:
-
-- Specs about a whole class
-- [rspec-rails](https://github.com/rspec/rspec-rails) **controller specs** style 
-- [rspec-rails](https://github.com/rspec/rspec-rails) **routing specs** style
+This release takes the work started by
+[@lsegal](https://github.com/lsegal/yard-spec-plugin),
+[@kputnam](https://github.com/kputnam/yard-spec-plugin) and
+[@Sage](https://github.com/Sage/yard-spec-plugin) and expands it to provide
+better support for block type specs, and an updated README.
 
 Installation
 ------------
 
 To install this release add this line to your application's Gemfile:
 
-    gem 'yard-spec-plugin', :git => 'https://github.com/ogeidix/yard-spec-plugin.git', :tag => 'v0.2'
+    gem 'yard-spec-plugin', github: "nikhgupta/yard-spec-plugin"
 
 Execute:
 
